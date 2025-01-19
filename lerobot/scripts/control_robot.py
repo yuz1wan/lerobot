@@ -288,6 +288,7 @@ def record(
         # input() messes with them.
         # if multi_task:
         #     task = input("Enter your task description: ")
+        robot.set_robot_home_position()
 
         log_say(f"Recording episode {dataset.num_episodes}", play_sounds)
         record_episode(
@@ -421,6 +422,7 @@ if __name__ == "__main__":
     task_args.add_argument(
         "--single-task",
         type=str,
+        default="Task description",
         help="A short but accurate description of the task performed during the recording.",
     )
     # TODO(aliberts): add multi-task support

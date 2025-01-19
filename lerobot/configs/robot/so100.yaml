@@ -13,7 +13,7 @@ calibration_dir: .cache/calibration/so100
 # `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.
 # Set this to a positive scalar to have the same value for all motors, or a list that is the same length as
 # the number of motors in your follower arms.
-max_relative_target: null
+max_relative_target: 10
 
 leader_arms:
   main:

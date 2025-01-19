@@ -267,7 +267,10 @@ def control_loop(
         start_loop_t = time.perf_counter()
 
         if teleoperate:
+            # robot.set_robot_home_position()
+            # time.sleep(20)
             observation, action = robot.teleop_step(record_data=True)
+            # print(action)
         else:
             observation = robot.capture_observation()
 
