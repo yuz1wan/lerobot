@@ -24,6 +24,8 @@ from lerobot.common.robot_devices.robots.utils import Robot
 from lerobot.common.robot_devices.utils import busy_wait
 from lerobot.common.utils.utils import get_safe_torch_device, init_hydra_config, set_global_seed
 from lerobot.scripts.eval import get_pretrained_policy_path
+import os
+import numpy as np
 
 
 def log_control_info(robot: Robot, dt_s, episode_index=None, frame_index=None, fps=None):
@@ -261,6 +263,23 @@ def control_loop(
         raise ValueError(
             f"The dataset fps should be equal to requested fps ({dataset['fps']} != {fps}).")
 
+    print('============================')
+    print('Start a New Episode')
+    observation = robot.capture_observation()
+    print("The first observation is: ", observation["observation.state"])
+    # for name in observation:
+    #     if "image" in name:
+    #         observation[name] = observation[name].type(torch.float32) / 255
+    #         observation[name] = observation[name].permute(
+    #             2, 0, 1).contiguous()
+    #         # save the first img
+    #         img_idx = 0
+    #         while os.path.exists(f'/Users/wangxiaoyi/Documents/Coding/lerobot/outputs/debug/first_{name}_{img_idx}.png'):
+    #             img_idx += 1
+    #         img = observation[name].cpu().numpy().transpose(1, 2, 0) * 255
+    #         img = img.astype(np.uint8)
+    #         cv2.imwrite(
+    #             f'/Users/wangxiaoyi/Documents/Coding/lerobot/outputs/debug/first_{name}_{img_idx}.png', img)
     timestamp = 0
     start_episode_t = time.perf_counter()
     while timestamp < control_time_s:
@@ -273,14 +292,21 @@ def control_loop(
             # print(action)
         else:
             observation = robot.capture_observation()
+            # print("observation", observation["observation.state"])
 
             if policy is not None:
+                current_time = time.perf_counter()
                 pred_action = predict_action(
                     observation, policy, device, use_amp)
                 # Action can eventually be clipped using `max_relative_target`,
                 # so action actually sent is saved in the dataset.
                 action = robot.send_action(pred_action)
+                print("The action is: ", action)
+                delta_time = time.perf_counter() - current_time
+                print("Time to predict action: ", delta_time)
                 action = {"action": action}
+            else:
+                print("No policy is provided, only capture observation.")
 
         if dataset is not None:
             frame = {**observation, **action}
@@ -295,6 +321,7 @@ def control_loop(
 
         if fps is not None:
             dt_s = time.perf_counter() - start_loop_t
+            # print("dt_s", dt_s)
             busy_wait(1 / fps - dt_s)
 
         dt_s = time.perf_counter() - start_loop_t
@@ -304,6 +331,26 @@ def control_loop(
         if events["exit_early"]:
             events["exit_early"] = False
             break
+
+    print('End of the Episode')
+    print("The last observation is: ", observation["observation.state"])
+    # for name in observation:
+    #     if "image" in name:
+    #         observation[name] = observation[name].type(torch.float32) / 255
+    #         observation[name] = observation[name].permute(
+    #             2, 0, 1).contiguous()
+    #         # save the last img
+    #         img_idx = 0
+    #         while os.path.exists(f'/Users/wangxiaoyi/Documents/Coding/lerobot/outputs/debug/last_{name}_{img_idx}.png'):
+    #             img_idx += 1
+    #         img = observation[name].cpu().numpy().transpose(1, 2, 0) * 255
+    #         img = img.astype(np.uint8)
+    #         cv2.imwrite(
+    #             f'/Users/wangxiaoyi/Documents/Coding/lerobot/outputs/debug/last_{name}_{img_idx}.png', img)
+    print('============================')
+
+    if policy is not None:
+        policy.reset()
 
 
 def reset_environment(robot, events, reset_time_s):

@@ -519,19 +519,20 @@ class ManipulatorRobot:
             home_pos = torch.from_numpy(
                 np.array([0.0, 180.0, 180.0, 75.0, -8.0, 0.0]))
             for name in self.follower_arms:
-                if self.config.max_relative_target is not None:
+                present_pos = self.follower_arms[name].read(
+                    "Present_Position")
+                present_pos = torch.from_numpy(present_pos)
+                while torch.any(torch.abs(home_pos - present_pos) > 10):
+                    goal_pos = ensure_safe_goal_position(
+                        home_pos, present_pos, 10)
+                    goal_pos = goal_pos.numpy().astype(np.int32)
+                    self.follower_arms[name].write(
+                        "Goal_Position", goal_pos)
                     present_pos = self.follower_arms[name].read(
                         "Present_Position")
                     present_pos = torch.from_numpy(present_pos)
-                    while torch.any(torch.abs(home_pos - present_pos) > 5):
-                        goal_pos = ensure_safe_goal_position(
-                            home_pos, present_pos, 5)
-                        goal_pos = goal_pos.numpy().astype(np.int32)
-                        self.follower_arms[name].write(
-                            "Goal_Position", goal_pos)
-                        present_pos = self.follower_arms[name].read(
-                            "Present_Position")
-                        present_pos = torch.from_numpy(present_pos)
+
+                    time.sleep(0.05)
 
                 goal_pos = home_pos.numpy().astype(np.int32)
                 self.follower_arms[name].write("Goal_Position", goal_pos)

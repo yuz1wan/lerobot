@@ -288,6 +288,9 @@ def record(
         # input() messes with them.
         # if multi_task:
         #     task = input("Enter your task description: ")
+        # print(">>>>>> breakpoint 1 <<<<<<<<")
+        # time.sleep(3)
+
         robot.set_robot_home_position()
 
         log_say(f"Recording episode {dataset.num_episodes}", play_sounds)
@@ -302,6 +305,8 @@ def record(
             use_amp=use_amp,
             fps=fps,
         )
+        # print(">>>>>> breakpoint 2 <<<<<<<<")
+        # time.sleep(3)
 
         # Execute a few seconds without recording to give time to manually reset the environment
         # Current code logic doesn't allow to teleoperate during this time.
@@ -312,7 +317,12 @@ def record(
              1) or events["rerecord_episode"]
         ):
             log_say("Reset the environment", play_sounds)
+            robot.set_robot_home_position()
             reset_environment(robot, events, reset_time_s)
+            # robot.set_robot_home_position()
+
+        # print(">>>>>> breakpoint 3 <<<<<<<<")
+        # time.sleep(3)
 
         if events["rerecord_episode"]:
             log_say("Re-record episode", play_sounds)
@@ -321,8 +331,14 @@ def record(
             dataset.clear_episode_buffer()
             continue
 
+        # print(">>>>>> breakpoint 4 <<<<<<<<")
+        # time.sleep(3)
+
         dataset.save_episode(task)
         recorded_episodes += 1
+
+        # print(">>>>>> breakpoint 5 <<<<<<<<")
+        # time.sleep(3)
 
         if events["stop_recording"]:
             break
