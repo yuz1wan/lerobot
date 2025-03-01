@@ -13,7 +13,7 @@ calibration_dir: .cache/calibration/so100
 # `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.
 # Set this to a positive scalar to have the same value for all motors, or a list that is the same length as
 # the number of motors in your follower arms.
-max_relative_target: 10
+max_relative_target: 15
 
 leader_arms:
   main:
@@ -48,9 +48,9 @@ cameras:
     fps: 30
     width: 640
     height: 480
-  wrist:
-    _target_: lerobot.common.robot_devices.cameras.opencv.OpenCVCamera
-    camera_index: 1
-    fps: 30
-    width: 640
-    height: 480
+  # wrist:
+  #   _target_: lerobot.common.robot_devices.cameras.opencv.OpenCVCamera
+  #   camera_index: 1
+  #   fps: 30
+  #   width: 640
+  #   height: 480
